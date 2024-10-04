@@ -26,6 +26,7 @@ public class UI_JoinRoom : UI_Popup
     private string _roomName;
     private string _password;
     private TMP_Text _warning;
+    private UI_Lobby _lobby;
 
     #endregion
 
@@ -49,16 +50,18 @@ public class UI_JoinRoom : UI_Popup
         Get<Button>((int)Buttons.Btn_No).onClick.AddListener(() =>
         {
             ClosePopupUI();
-            var popup = Managers.UIMng.ShowPopupUI<UI_SessionList>(parent: transform.parent);
+            var popup = Managers.UIMng.ShowPopupUI<UI_SessionList>(parent: _lobby.Right);
             popup.Init();
+            popup.SetInfo(_lobby);
             popup.RefreshSessionLIst();
         });
 
         return true;
     }
 
-    public void SetInfo(string roomName, string password)
+    public void SetInfo(string roomName, string password, UI_Lobby lobby)
     {
+        _lobby = lobby;
         _roomName = roomName;
         _password = password;
     }

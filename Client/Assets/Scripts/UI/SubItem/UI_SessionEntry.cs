@@ -3,10 +3,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Fusion;
+using System;
 
 public class SessionEntryArgs
 {
-    public SessionInfo session { get; set; }
+    public SessionInfo _session { get; set; }
+    public string RoomName { get; set; }
+    public int CurrentMembers { get; set; }
+    public int MaxMembers { get; set; }
+    public bool IsOpen { get; set; }
 }
 
 public class UI_SessionEntry : UI_Base
@@ -28,7 +33,8 @@ public class UI_SessionEntry : UI_Base
     }
     #endregion
 
-    private SessionInfo _session;
+    private UI_Lobby _lobby;
+    public Action OnClick { get; set; }
 
     public override bool Init()
     {
@@ -41,63 +47,28 @@ public class UI_SessionEntry : UI_Base
 
         transform.localScale = Vector3.one;
         transform.localPosition = Vector3.zero;
-        GetButton(Buttons.JoinButton).onClick.AddListener(JoinSession);
+        GetButton(Buttons.JoinButton).onClick.AddListener(() => OnClick.Invoke());
 
         return true;
     }
 
-    public IEnumerator SetInfo(SessionEntryArgs args)
+    public IEnumerator SetInfo(SessionEntryArgs args, UI_Lobby lobby)
     {
         yield return null;
-        _session = args.session;
 
-        string roomName = _session.Name;
-        if (_session.Properties.TryGetValue("password", out SessionProperty password) && password != "")
-        {
-            roomName = "<sprite=0>   " + roomName;
-        }
-        else
-        {
-            roomName = "       " + roomName;
-        }
+        _lobby = lobby;
+        string roomName = args.RoomName;
 
         GetText(Texts.RoomName).text = roomName;
-        GetText(Texts.PlayerCount).text = _session.PlayerCount + "/" + _session.MaxPlayers;
-        if (_session.IsOpen == false || _session.PlayerCount >= _session.MaxPlayers)
+        GetText(Texts.PlayerCount).text = args.CurrentMembers + "/" + args.MaxMembers;
+
+        if (args.IsOpen == false || args.CurrentMembers >= args.MaxMembers)
         {
             GetButton(Buttons.JoinButton).interactable = false;
         }
         else
         {
             GetButton(Buttons.JoinButton).interactable = true;
-        }
-    }
-
-    private async void JoinSession()
-    {
-        if (_session.Properties.TryGetValue("password", out SessionProperty password))
-        {
-            Managers.UIMng.ClosePopupUIUntil<UI_Lobby>();
-            var popup = Managers.UIMng.ShowPopupUI<UI_JoinRoom>(parent: Managers.UIMng.PeekPopupUI<UI_Lobby>().transform);
-            popup.SetInfo(_session.Name, password);
-        }
-        else
-        {
-            Managers.UIMng.ShowPopupUI<UI_RaycastBlock>();
-            bool result = await Managers.NetworkMng.ConnectToSession(_session.Name, null);
-            Managers.UIMng.ClosePopupUI();
-
-            if (result)
-            {
-                Managers.Clear();
-                Managers.UIMng.ShowPanelUI<UI_Loading>();
-            }
-            else
-            {
-                Managers.UIMng.ClosePopupUIUntil<UI_Lobby>();
-                var lobby = Managers.UIMng.PeekPopupUI<UI_Lobby>();
-                Managers.UIMng.ShowPopupUI<UI_Warning>(parent : lobby.transform);
-            }
         }
     }
 }

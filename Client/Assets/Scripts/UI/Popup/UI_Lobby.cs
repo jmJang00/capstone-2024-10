@@ -21,7 +21,14 @@ public class UI_Lobby : UI_Popup
     {
         Search,
     }
+
+    enum GameObjects
+    {
+        Right
+    }
     #endregion
+
+    public Transform Right {  get; set; }
 
     public override bool Init()
     {
@@ -30,7 +37,9 @@ public class UI_Lobby : UI_Popup
 
         Bind<Button>(typeof(Buttons));
         Bind<TMP_InputField>(typeof(Inputs));
+        Bind<GameObject>(typeof(GameObjects));
 
+        Right = GetObject(GameObjects.Right).transform;
         GetButton((int)Buttons.Btn_QuickStart).onClick.AddListener(EnterGame);
         GetButton((int)Buttons.Btn_CreateGame).onClick.AddListener(CreateGame);
         GetButton((int)Buttons.Btn_RefreshSession).onClick.AddListener(Refresh);
@@ -42,8 +51,9 @@ public class UI_Lobby : UI_Popup
         Managers.NetworkMng.OnSessionUpdated += () => GetButton((int)Buttons.Btn_QuickStart).interactable = true;
         Managers.NetworkMng.OnSessionUpdated += () => GetButton((int)Buttons.Btn_GameTutorial).interactable = true;
 
-        var popup = Managers.UIMng.ShowPopupUI<UI_SessionList>(parent: transform);
+        var popup = Managers.UIMng.ShowPopupUI<UI_SessionList>(parent: Right);
         popup.Init();
+        popup.SetInfo(this);
         popup.RefreshSessionLIst();
 
         return true;
@@ -69,8 +79,9 @@ public class UI_Lobby : UI_Popup
     private IEnumerator RefreshWait()
     {
         Managers.UIMng.ClosePopupUIUntil<UI_Lobby>();
-        var popup = Managers.UIMng.ShowPopupUI<UI_SessionList>(parent : transform);
+        var popup = Managers.UIMng.ShowPopupUI<UI_SessionList>(parent : Right);
         popup.Init();
+        popup.SetInfo(this);
 
         GetButton((int)Buttons.Btn_RefreshSession).interactable = false;
         popup.RefreshSessionLIst(Get<TMP_InputField>(Inputs.Search).text.Trim());
@@ -90,7 +101,7 @@ public class UI_Lobby : UI_Popup
         Managers.UIMng.ClosePopupUIUntil<UI_Lobby>();
         var popup = Managers.UIMng.ShowPopupUI<UI_CreateRoom>(parent: transform);
         popup.Init();
-        popup.SetInfo();
+        popup.SetInfo(this);
     }
 
     private async void EnterGame()

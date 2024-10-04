@@ -22,7 +22,7 @@ public class Managers : MonoBehaviour
     private SoundManager _soundMng = new SoundManager();
     private UIManager _uiMng = new UIManager();
     private GameManager _gameMng = new GameManager();
-    private NetworkManager _networkMng;
+    private NetworkManagerEX _networkMng;
     private TutorialManager _tutorialMng = new TutorialManager();
 
     public static DataManager DataMng => Instance._dataMng;
@@ -30,7 +30,7 @@ public class Managers : MonoBehaviour
     public static SceneManagerEx SceneMng => Instance._sceneMng;
     public static SoundManager SoundMng => Instance._soundMng;
     public static UIManager UIMng => Instance._uiMng;
-    public static NetworkManager NetworkMng => Instance._networkMng;
+    public static NetworkManagerEX NetworkMng => Instance._networkMng;
     public static GameManager GameMng => Instance._gameMng;
     public static TutorialManager TutorialMng => Instance._tutorialMng;
     #endregion
@@ -46,12 +46,12 @@ public class Managers : MonoBehaviour
             {
                 go = new GameObject { name = "@Managers" };
                 go.AddComponent<Managers>();
-                go.AddComponent<NetworkManager>();
+                go.AddComponent<NetworkManagerEX>();
             }
 
             DontDestroyOnLoad(go);
             s_instance = go.GetComponent<Managers>();
-            s_instance._networkMng = go.GetOrAddComponent<NetworkManager>();
+            s_instance._networkMng = go.GetOrAddComponent<NetworkManagerEX>();
 
             NetworkMng.Init();
             DataMng.Init();

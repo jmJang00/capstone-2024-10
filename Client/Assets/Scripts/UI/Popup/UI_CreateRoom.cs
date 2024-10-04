@@ -24,6 +24,8 @@ public class UI_CreateRoom : UI_Popup
     public TMP_InputField Password { get; private set; }
     public TMP_Text RoomNamePlaceholder { get; private set; }
 
+    private UI_Lobby _lobby { get; set; }
+
     #endregion
 
     public override bool Init()
@@ -44,16 +46,18 @@ public class UI_CreateRoom : UI_Popup
         Get<Button>((int)Buttons.Btn_No).onClick.AddListener(() =>
         {
             ClosePopupUI();
-            var popup = Managers.UIMng.ShowPopupUI<UI_SessionList>(parent: transform.parent);
+            var popup = Managers.UIMng.ShowPopupUI<UI_SessionList>(parent: _lobby.Right);
             popup.Init();
+            popup.SetInfo(_lobby);
             popup.RefreshSessionLIst();
         });
 
         return true;
     }
 
-    public void SetInfo()
+    public void SetInfo(UI_Lobby lobby)
     {
+        _lobby = lobby;
         int randomInt = Random.Range(1000, 9999);
         RoomNamePlaceholder.text = "Room-" + randomInt.ToString();
         Password.text = "";
